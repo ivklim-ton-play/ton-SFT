@@ -1,9 +1,11 @@
 ;; SFT minter smart contract
 
+int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
+
 ;; storage scheme
 ;; storage#_ index:uint64 collection_address:MsgAddress total_supply:Coins admin_address:MsgAddress individual_sft_content:^Cell sft_wallet_code:^Cell = Storage;
 
-(int, int, int, slice, slice, cell, cell) load_data() inline {
+(int, int, slice, int, slice, cell, cell) load_data() inline {
   slice ds = get_data().begin_parse();
   var (index, collection_address) = (ds~load_uint(64), ds~load_msg_addr());
   if (ds.slice_bits() > 0) {
@@ -25,6 +27,22 @@
           );
 }
 
+() send_msg(slice to_address, int amount, int op, int query_id, builder payload, int send_mode) impure inline {
+  var msg = begin_cell()
+    .store_uint(0x10, 6) ;; nobounce - int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
+    .store_slice(to_address)
+    .store_coins(amount)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+    .store_uint(op, 32)
+    .store_uint(query_id, 64);
+
+  if (~ builder_null?(payload)) {
+    msg = msg.store_builder(payload);
+  }
+
+  send_raw_message(msg.end_cell(), send_mode);
+}
+
 () mint_sft_tokens(slice to_address, cell sft_wallet_code, int ton_amount, cell internal_transfer_op) impure {
   cell state_init = calculate_sft_wallet_state_init(to_address, my_address(), sft_wallet_code);
   slice to_wallet_address = calculate_sft_wallet_address(state_init);
@@ -38,7 +56,7 @@
   send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
 }
 
-() transfer_admin_role(int balance, int index, slice collection_address, slice admin_address, cell individual_sft_content, slice sender_address, int query_id, slice in_msg_body, int fwd_fees) impure inline {
+() transfer_admin_role(int balance, int index, slice collection_address, slice admin_address, cell individual_sft_content, slice sender_address, int query_id, slice in_msg_body, int fwd_fees, int total_supply, cell sft_wallet_code) impure inline {
     throw_unless(401, equal_slices(sender_address, admin_address));
 
     slice new_admin_address = in_msg_body~load_msg_addr();
@@ -47,7 +65,7 @@
     in_msg_body~load_int(1); ;; this sft minter don't use custom_payload
     int forward_amount = in_msg_body~load_coins();
 
-    int rest_amount = my_balance - min_tons_for_storage();
+    int rest_amount = balance - min_tons_for_storage();
     if (forward_amount) {
       rest_amount -= (forward_amount + fwd_fees);
     }
@@ -66,23 +84,7 @@
       send_msg(response_destination, rest_amount, op::excesses(), query_id, null(), 1); ;; paying fees, revert on errors
     }
 
-    store_data(index, collection_address, new_admin_address, content);
-}
-
-() send_msg(slice to_address, int amount, int op, int query_id, builder payload, int send_mode) impure inline {
-  var msg = begin_cell()
-    .store_uint(0x10, 6) ;; nobounce - int_msg_info$0 ihr_disabled:Bool bounce:Bool bounced:Bool src:MsgAddress -> 011000
-    .store_slice(to_address)
-    .store_coins(amount)
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-    .store_uint(op, 32)
-    .store_uint(query_id, 64);
-
-  if (~ builder_null?(payload)) {
-    msg = msg.store_builder(payload);
-  }
-
-  send_raw_message(msg.end_cell(), send_mode);
+    save_data(index, collection_address, total_supply, new_admin_address, individual_sft_content, sft_wallet_code);
 }
 
 () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -107,7 +109,7 @@
 
     if (~ init?) {
       throw_unless(405, equal_slices(collection_address, sender_address));
-      store_data(index, collection_address, in_msg_body~load_coins(), in_msg_body~load_msg_addr(), in_msg_body~load_ref(), in_msg_body~load_ref());
+      save_data(index, collection_address, in_msg_body~load_coins(), in_msg_body~load_msg_addr(), in_msg_body~load_ref(), in_msg_body~load_ref());
       return ();
     }
 
@@ -168,8 +170,8 @@
     cs~load_coins(); ;; skip ihr_fee
     int fwd_fee = cs~load_coins(); ;; we use message fwd_fee for estimation of forward_payload costs
 
-    if (op == op::transfer()) {
-      transfer_admin_role(balance, index, collection_address, admin_address, individual_sft_content, sender_address, query_id, in_msg_body, fwd_fee);
+    if (op == op::transfer_ownership()) {
+      transfer_admin_role(balance, index, collection_address, admin_address, individual_sft_content, sender_address, query_id, in_msg_body, fwd_fee, total_supply, sft_wallet_code);
       return ();
     }
 
@@ -181,7 +183,7 @@
     throw(0xffff);
 }
 
-(int?, int, int, slice, slice, cell, cell) get_sft_data() method_id {
+(int, int, slice, int, slice, cell, cell) get_sft_data() method_id {
     (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
     return (init?, index, collection_address, total_supply, admin_address, individual_sft_content, sft_wallet_code);
 }

@@ -1,0 +1,457 @@
+"Asm.fif" include
+// automatically generated from `stdlib.fc` `params.fc` `op-codes.fc` `sft-utils.fc` `sft-minter.fc` 
+PROGRAM{
+  DECLPROC force_chain
+  DECLPROC pack_sft_wallet_data
+  DECLPROC calculate_sft_wallet_state_init
+  DECLPROC calculate_sft_wallet_address
+  DECLPROC calculate_user_sft_wallet_address
+  DECLPROC load_data
+  DECLPROC save_data
+  DECLPROC send_msg
+  DECLPROC mint_sft_tokens
+  DECLPROC transfer_admin_role
+  DECLPROC recv_internal
+  123935 DECLMETHOD get_sft_data
+  103289 DECLMETHOD get_wallet_address
+  force_chain PROC:<{
+    //  addr
+    REWRITESTDADDR	//  _8 _9
+    DROP	//  wc
+    0 PUSHINT	//  wc _5
+    EQUAL	//  _6
+    333 THROWIFNOT
+  }>
+  pack_sft_wallet_data PROC:<{
+    //  balance owner_address sft_minter_address sft_wallet_code
+    NEWC	//  balance owner_address sft_minter_address sft_wallet_code _4
+    s0 s4 XCHG2	//  sft_wallet_code owner_address sft_minter_address _4 balance
+    STVARUINT16	//  sft_wallet_code owner_address sft_minter_address _5
+    ROT	//  sft_wallet_code sft_minter_address _5 owner_address
+    STSLICER	//  sft_wallet_code sft_minter_address _6
+    SWAP	//  sft_wallet_code _6 sft_minter_address
+    STSLICER	//  sft_wallet_code _7
+    STREF	//  _8
+    ENDC	//  _9
+  }>
+  calculate_sft_wallet_state_init PROC:<{
+    //  owner_address sft_minter_address sft_wallet_code
+    0 PUSHINT	//  owner_address sft_minter_address sft_wallet_code _3=0
+    s0 s1 s2 XCPUXC
+    s4 s0 s3 XC2PU	//  _3=0 sft_wallet_code _4=0 owner_address sft_minter_address sft_wallet_code
+    pack_sft_wallet_data INLINECALLDICT	//  _3=0 sft_wallet_code _5
+    s2 PUSH	//  _3=0 sft_wallet_code _5 _6=0
+    NEWC	//  _3=0 sft_wallet_code _5 _6=0 _7
+    2 STU	//  _3=0 sft_wallet_code _5 _9
+    s1 s2 XCHG	//  _3=0 _5 sft_wallet_code _9
+    STDICT	//  _3=0 _5 _10
+    STDICT	//  _3=0 _11
+    1 STU	//  _13
+    ENDC	//  _14
+  }>
+  calculate_sft_wallet_address PROC:<{
+    //  state_init
+    HASHCU	//  _1
+    0 PUSHINT	//  _1 _2
+    4 PUSHINT	//  _1 _2 _3=4
+    NEWC	//  _1 _2 _3=4 _4
+    3 STU	//  _1 _2 _6
+    8 STI	//  _1 _8
+    256 STU	//  _10
+    ENDC	//  _11
+    CTOS	//  _12
+  }>
+  calculate_user_sft_wallet_address PROC:<{
+    //  owner_address sft_minter_address sft_wallet_code
+    calculate_sft_wallet_state_init INLINECALLDICT	//  _3
+    calculate_sft_wallet_address INLINECALLDICT	//  _4
+  }>
+  load_data PROC:<{
+    // 
+    c4 PUSH	//  _1
+    CTOS	//  ds
+    64 LDU	//  _5 ds
+    LDMSGADDR	//  index collection_address ds
+    DUP	//  index collection_address ds ds
+    SBITS	//  index collection_address ds _10
+    0 GTINT	//  index collection_address ds _12
+    IFJMP:<{	//  index collection_address ds
+      -1 PUSHINT	//  index collection_address ds _13=-1
+      SWAP	//  index collection_address _13=-1 ds
+      LDVARUINT16	//  index collection_address _13=-1 _14 ds
+      LDMSGADDR	//  index collection_address _13=-1 _14 _16 ds
+      LDREF	//  index collection_address _13=-1 _14 _16 _18 ds
+      LDREF	//  index collection_address _13=-1 _14 _16 _18 _42 _41
+      DROP	//  index collection_address _13=-1 _14 _16 _18 _20
+      s4 s6 XCHG
+      s4 s5 XCHG	//  _13=-1 index collection_address _14 _16 _18 _20
+    }>	//  index collection_address ds
+    0 PUSHINT	//  index collection_address ds _22=0
+    SWAP	//  index collection_address _22=0 ds
+    LDVARUINT16	//  index collection_address _22=0 _23 ds
+    LDMSGADDR	//  index collection_address _22=0 _23 _25 ds
+    LDREF	//  index collection_address _22=0 _23 _25 _27 ds
+    LDREF	//  index collection_address _22=0 _23 _25 _27 _50 _49
+    DROP	//  index collection_address _22=0 _23 _25 _27 _29
+    s4 s6 XCHG
+    s4 s5 XCHG	//  _22=0 index collection_address _23 _25 _27 _29
+  }>
+  save_data PROC:<{
+    //  index collection_address total_supply admin_address individual_sft_content sft_wallet_code
+    s0 s5 XCHG
+    NEWC	//  sft_wallet_code collection_address total_supply admin_address individual_sft_content index _6
+    64 STU	//  sft_wallet_code collection_address total_supply admin_address individual_sft_content _8
+    s0 s4 XCHG2	//  sft_wallet_code individual_sft_content total_supply admin_address _8 collection_address
+    STSLICER	//  sft_wallet_code individual_sft_content total_supply admin_address _9
+    ROT	//  sft_wallet_code individual_sft_content admin_address _9 total_supply
+    STVARUINT16	//  sft_wallet_code individual_sft_content admin_address _10
+    SWAP	//  sft_wallet_code individual_sft_content _10 admin_address
+    STSLICER	//  sft_wallet_code individual_sft_content _11
+    STREF	//  sft_wallet_code _12
+    STREF	//  _13
+    ENDC	//  _14
+    c4 POP
+  }>
+  send_msg PROC:<{
+    //  to_address amount op query_id payload send_mode
+    0 PUSHINT	//  to_address amount op query_id payload send_mode _7=0
+    16 PUSHINT	//  to_address amount op query_id payload send_mode _7=0 _8=16
+    NEWC	//  to_address amount op query_id payload send_mode _7=0 _8=16 _9
+    6 STU	//  to_address amount op query_id payload send_mode _7=0 _11
+    s0 s7 XCHG2	//  _7=0 amount op query_id payload send_mode _11 to_address
+    STSLICER	//  _7=0 amount op query_id payload send_mode _12
+    s0 s5 XCHG2	//  _7=0 send_mode op query_id payload _12 amount
+    STVARUINT16	//  _7=0 send_mode op query_id payload _13
+    s1 s5 XCHG	//  payload send_mode op query_id _7=0 _13
+    107 STU	//  payload send_mode op query_id _27
+    s1 s2 XCHG	//  payload send_mode query_id op _27
+    32 STU	//  payload send_mode query_id _29
+    64 STU	//  payload send_mode msg
+    s2 PUSH	//  payload send_mode msg payload
+    ISNULL	//  payload send_mode msg _32
+    NOT	//  payload send_mode msg _33
+    IF:<{	//  payload send_mode msg
+      ROT	//  send_mode msg payload
+      STBR	//  send_mode msg
+      SWAP	//  msg send_mode
+    }>ELSE<{
+      s2 POP	//  msg send_mode
+    }>
+    SWAP	//  send_mode msg
+    ENDC	//  send_mode _35
+    SWAP	//  _35 send_mode
+    SENDRAWMSG
+  }>
+  mint_sft_tokens PROC:<{
+    //  to_address sft_wallet_code ton_amount internal_transfer_op
+    MYADDR	//  to_address sft_wallet_code ton_amount internal_transfer_op _5
+    s4 s0 s3 XCHG3	//  ton_amount internal_transfer_op to_address _5 sft_wallet_code
+    calculate_sft_wallet_state_init INLINECALLDICT	//  ton_amount internal_transfer_op state_init
+    DUP	//  ton_amount internal_transfer_op state_init state_init
+    calculate_sft_wallet_address INLINECALLDICT	//  ton_amount internal_transfer_op state_init to_wallet_address
+    7 PUSHINT	//  ton_amount internal_transfer_op state_init to_wallet_address _14
+    24 PUSHINT	//  ton_amount internal_transfer_op state_init to_wallet_address _14 _15=24
+    NEWC	//  ton_amount internal_transfer_op state_init to_wallet_address _14 _15=24 _16
+    6 STU	//  ton_amount internal_transfer_op state_init to_wallet_address _14 _18
+    ROT	//  ton_amount internal_transfer_op state_init _14 _18 to_wallet_address
+    STSLICER	//  ton_amount internal_transfer_op state_init _14 _19
+    s0 s4 XCHG2	//  _14 internal_transfer_op state_init _19 ton_amount
+    STVARUINT16	//  _14 internal_transfer_op state_init _20
+    s1 s3 XCHG	//  state_init internal_transfer_op _14 _20
+    108 STU	//  state_init internal_transfer_op _36
+    s1 s2 XCHG	//  internal_transfer_op state_init _36
+    STREF	//  internal_transfer_op _37
+    STREF	//  msg
+    ENDC	//  _39
+    1 PUSHINT	//  _39 _40=1
+    SENDRAWMSG
+  }>
+  transfer_admin_role PROC:<{
+    //  balance index collection_address admin_address individual_sft_content sender_address query_id in_msg_body fwd_fees total_supply sft_wallet_code
+    s5 s7 XCPU	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id in_msg_body fwd_fees total_supply sender_address admin_address
+    SDEQ	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id in_msg_body fwd_fees total_supply _12
+    401 THROWIFNOT
+    s0 s2 XCHG	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees in_msg_body
+    LDMSGADDR	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address in_msg_body
+    OVER	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address in_msg_body new_admin_address
+    force_chain CALLDICT
+    LDMSGADDR	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination in_msg_body
+    1 LDI	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination _59 _58
+    NIP	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination in_msg_body
+    LDVARUINT16	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount in_msg_body
+    50000000 PUSHINT	//  balance index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount in_msg_body _28
+    s1 s13 XCHG	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount balance _28
+    SUB	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount
+    OVER	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount forward_amount
+    IF:<{	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount
+      s1 s4 PUSH2	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount forward_amount fwd_fees
+      ADD	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount _30
+      SUB	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount
+    }>	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount
+    s2 PUSH	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount response_destination
+    2 PLDU	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount _34
+    0 NEQINT	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount need_response
+    DUP	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount need_response need_response
+    IF:<{	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply fwd_fees new_admin_address response_destination forward_amount rest_amount need_response
+      s0 s5 XCHG	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount fwd_fees
+      SUB	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount
+    }>ELSE<{
+      s5 POP	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount
+    }>
+    DUP	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount rest_amount
+    -1 GTINT	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount _40
+    402 THROWIFNOT
+    OVER	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount forward_amount
+    IF:<{	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount
+      0x05138d91 PUSHINT	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount _42
+      NEWC	//  in_msg_body index collection_address admin_address individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount _42 _43
+      s0 s11 XCHG2	//  in_msg_body index collection_address _42 individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount _43 admin_address
+      STSLICER	//  in_msg_body index collection_address _42 individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount rest_amount _44
+      s0 s13 XCHG2	//  rest_amount index collection_address _42 individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount _44 in_msg_body
+      STSLICER	//  rest_amount index collection_address _42 individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount _45
+      1 PUSHINT	//  rest_amount index collection_address _42 individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address response_destination forward_amount _45 _46=1
+      s4 PUSH
+      s11 s1 s4 XCHG3
+      s8 s11 s(-1) PUXC2	//  rest_amount index collection_address response_destination individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address new_admin_address forward_amount _42 query_id _45 _46=1
+      send_msg INLINECALLDICT
+      s6 s9 XCHG	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address
+    }>ELSE<{
+      s2 s12 XCHG
+      s9 POP
+      2DROP	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply need_response new_admin_address
+    }>
+    SWAP	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply new_admin_address need_response
+    IF:<{	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply new_admin_address
+      s8 PUSH	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply new_admin_address response_destination
+      force_chain CALLDICT
+      0xd53276db PUSHINT	//  response_destination index collection_address rest_amount individual_sft_content sft_wallet_code query_id total_supply new_admin_address _49
+      s3 s9 XCHG
+      s6 s0 s9 XCHG3
+      PUSHNULL
+      1 PUSHINT	//  new_admin_address index collection_address total_supply individual_sft_content sft_wallet_code response_destination rest_amount _49 query_id _50 _51=1
+      send_msg INLINECALLDICT
+    }>ELSE<{
+      s8 POP
+      s4 POP
+      DROP	//  new_admin_address index collection_address total_supply individual_sft_content sft_wallet_code
+    }>
+    s4 s5 XCHG
+    s3 s4 XCHG
+    s2 s3 XCHG	//  index collection_address total_supply new_admin_address individual_sft_content sft_wallet_code
+    save_data INLINECALLDICT
+  }>
+  recv_internal PROC:<{
+    //  balance msg_value in_msg_full in_msg_body
+    s2 POP	//  balance in_msg_body in_msg_full
+    OVER	//  balance in_msg_body in_msg_full in_msg_body
+    SEMPTY	//  balance in_msg_body in_msg_full _4
+    IFJMP:<{	//  balance in_msg_body in_msg_full
+      3 BLKDROP	// 
+    }>	//  balance in_msg_body in_msg_full
+    CTOS	//  balance in_msg_body cs
+    4 LDU	//  balance in_msg_body flags cs
+    SWAP
+    1 PUSHINT	//  balance in_msg_body cs flags _11=1
+    AND	//  balance in_msg_body cs _12
+    IFJMP:<{	//  balance in_msg_body cs
+      3 BLKDROP	// 
+    }>	//  balance in_msg_body cs
+    LDMSGADDR	//  balance in_msg_body sender_address cs
+    load_data INLINECALLDICT	//  balance in_msg_body sender_address cs init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
+    s0 s6 XCHG	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content init?
+    NOT	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content _24
+    IFJMP:<{	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content
+      3 BLKDROP
+      2 2 BLKDROP2
+      s4 POP	//  collection_address in_msg_body sender_address index
+      s3 s1 PUXC	//  collection_address in_msg_body index collection_address sender_address
+      SDEQ	//  collection_address in_msg_body index _26
+      405 THROWIFNOT
+      SWAP	//  collection_address index in_msg_body
+      LDVARUINT16	//  collection_address index _28 in_msg_body
+      LDMSGADDR	//  collection_address index _28 _30 in_msg_body
+      LDREF	//  collection_address index _28 _30 _32 in_msg_body
+      LDREF	//  collection_address index _28 _30 _32 _189 _188
+      DROP	//  collection_address index _28 _30 _32 _34
+      s4 s5 XCHG	//  index collection_address _28 _30 _32 _34
+      save_data INLINECALLDICT
+    }>	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content
+    s0 s8 XCHG	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address in_msg_body
+    32 LDU	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op in_msg_body
+    64 LDU	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+    21 PUSHINT	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _45
+    s3 s(-1) PUXC	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body op _45
+    EQUAL	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _46
+    IFJMP:<{	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+      s8 POP
+      2DROP
+      s8 POP	//  admin_address individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply
+      s5 s7 XCPU	//  admin_address individual_sft_content total_supply in_msg_body sft_wallet_code index collection_address sender_address admin_address
+      SDEQ	//  admin_address individual_sft_content total_supply in_msg_body sft_wallet_code index collection_address _48
+      73 THROWIFNOT
+      s0 s3 XCHG	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index in_msg_body
+      LDMSGADDR	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address in_msg_body
+      LDVARUINT16	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount in_msg_body
+      LDREF	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount _199 _198
+      DROP	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op
+      DUP	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op internal_transfer_op
+      CTOS	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op internal_transfer_op_cs
+      96 PUSHINT	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op internal_transfer_op_cs _64
+      SDSKIPFIRST	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op internal_transfer_op_cs
+      LDVARUINT16	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op _201 _200
+      DROP	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index to_address ton_amount internal_transfer_op sft_amount
+      s5 PUSH
+      s3 s4 XCHG
+      s4 s2 XCHG2	//  admin_address individual_sft_content total_supply collection_address sft_wallet_code index sft_amount to_address sft_wallet_code ton_amount internal_transfer_op
+      mint_sft_tokens CALLDICT
+      s1 s4 XCHG	//  admin_address individual_sft_content index collection_address sft_wallet_code total_supply sft_amount
+      ADD	//  admin_address individual_sft_content index collection_address sft_wallet_code _70
+      s3 s5 XCHG
+      s4 s1 s3 XCHG3
+      -ROT	//  index collection_address _70 admin_address individual_sft_content sft_wallet_code
+      save_data INLINECALLDICT
+    }>	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+    0x7bdd97de PUSHINT	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _72
+    s3 s(-1) PUXC	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body op _72
+    EQUAL	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _73
+    IFJMP:<{	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+      s2 POP
+      s7 POP
+      s9 POP	//  in_msg_body individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply admin_address
+      s0 s8 XCHG	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply in_msg_body
+      LDVARUINT16	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply sft_amount in_msg_body
+      LDMSGADDR	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply sft_amount from_address in_msg_body
+      MYADDR	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply sft_amount from_address in_msg_body _81
+      s2 s0 s7 XC2PU	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply sft_amount in_msg_body from_address _81 sft_wallet_code
+      calculate_user_sft_wallet_address INLINECALLDICT	//  admin_address individual_sft_content sender_address query_id sft_wallet_code index collection_address total_supply sft_amount in_msg_body _82
+      s0 s8 XCHG2	//  admin_address individual_sft_content in_msg_body query_id sft_wallet_code index collection_address total_supply sft_amount _82 sender_address
+      SDEQ	//  admin_address individual_sft_content in_msg_body query_id sft_wallet_code index collection_address total_supply sft_amount _83
+      74 THROWIFNOT
+      SUB	//  admin_address individual_sft_content in_msg_body query_id sft_wallet_code index collection_address _85
+      3 3 BLKSWAP
+      s7 s6 s0 XCHG3	//  in_msg_body query_id index collection_address _85 admin_address individual_sft_content sft_wallet_code
+      save_data INLINECALLDICT
+      SWAP	//  query_id in_msg_body
+      LDMSGADDR	//  query_id _207 _206
+      DROP	//  query_id response_address
+      DUP	//  query_id response_address response_address
+      2 PLDU	//  query_id response_address _91
+      0 NEQINT	//  query_id response_address _93
+      IF:<{	//  query_id response_address
+        0xd53276db PUSHINT	//  query_id response_address _95
+        0 PUSHINT	//  query_id response_address _95 _96=0
+        16 PUSHINT	//  query_id response_address _95 _96=0 _97=16
+        NEWC	//  query_id response_address _95 _96=0 _97=16 _98
+        6 STU	//  query_id response_address _95 _96=0 _100
+        s0 s3 XCHG2	//  query_id _96=0 _95 _100 response_address
+        STSLICER	//  query_id _96=0 _95 _101
+        s2 PUSH	//  query_id _96=0 _95 _101 _102=0
+        STVARUINT16	//  query_id _96=0 _95 _103
+        s1 s2 XCHG	//  query_id _95 _96=0 _103
+        107 STU	//  query_id _95 _117
+        32 STU	//  query_id _119
+        64 STU	//  msg
+        ENDC	//  _122
+        66 PUSHINT	//  _122 _125
+        SENDRAWMSG
+      }>ELSE<{
+        2DROP	// 
+      }>
+    }>	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+    23 PUSHINT	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _127
+    s3 s(-1) PUXC	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body op _127
+    EQUAL	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _128
+    IFJMP:<{	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+      s8 POP
+      2DROP
+      s8 POP	//  admin_address individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply
+      s5 s7 XCHG2	//  total_supply individual_sft_content collection_address in_msg_body sft_wallet_code index sender_address admin_address
+      SDEQ	//  total_supply individual_sft_content collection_address in_msg_body sft_wallet_code index _130
+      73 THROWIFNOT
+      s0 s2 XCHG	//  total_supply individual_sft_content collection_address index sft_wallet_code in_msg_body
+      LDMSGADDR	//  total_supply individual_sft_content collection_address index sft_wallet_code _209 _208
+      DROP	//  total_supply individual_sft_content collection_address index sft_wallet_code new_admin_address
+      4 2 REVERSE
+      s0 s3 s3 XCHG3	//  index collection_address total_supply new_admin_address individual_sft_content sft_wallet_code
+      save_data INLINECALLDICT
+    }>	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+    24 PUSHINT	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _136
+    s3 s(-1) PUXC	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body op _136
+    EQUAL	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body _137
+    IFJMP:<{	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+      s8 POP
+      2DROP
+      s7 POP
+      s7 POP	//  total_supply admin_address sender_address in_msg_body sft_wallet_code index collection_address
+      s4 s5 XCPU	//  total_supply admin_address collection_address in_msg_body sft_wallet_code index sender_address admin_address
+      SDEQ	//  total_supply admin_address collection_address in_msg_body sft_wallet_code index _139
+      73 THROWIFNOT
+      s0 s2 XCHG	//  total_supply admin_address collection_address index sft_wallet_code in_msg_body
+      LDREF	//  total_supply admin_address collection_address index sft_wallet_code _211 _210
+      DROP	//  total_supply admin_address collection_address index sft_wallet_code _141
+      4 2 REVERSE
+      s3 s0 s0 XCHG3	//  index collection_address total_supply admin_address _141 sft_wallet_code
+      save_data INLINECALLDICT
+    }>	//  balance individual_sft_content sender_address cs sft_wallet_code index collection_address total_supply admin_address op query_id in_msg_body
+    s0 s8 XCHG	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs
+    LDMSGADDR	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id _213 _212
+    NIP	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs
+    LDVARUINT16	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id _215 _214
+    NIP	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs
+    1 PUSHINT	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs _149=1
+    SDSKIPFIRST	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs
+    LDVARUINT16	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id _217 _216
+    NIP	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id cs
+    LDVARUINT16	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id _219 _218
+    DROP	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee
+    0x5fcc3d14 PUSHINT	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee _156
+    s3 s(-1) PUXC	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee op _156
+    EQUAL	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee _157
+    IFJMP:<{	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee
+      s2 POP	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address fwd_fee query_id
+      s5 s9 XCHG
+      s4 s8 XCHG
+      s2 s7 XCHG
+      s5 s6 XCHG
+      s0 s4 XCHG
+      s1 s3 s5 XCHG3	//  balance index collection_address admin_address individual_sft_content sender_address query_id in_msg_body fwd_fee total_supply sft_wallet_code
+      transfer_admin_role INLINECALLDICT
+    }>	//  balance individual_sft_content sender_address in_msg_body sft_wallet_code index collection_address total_supply admin_address op query_id fwd_fee
+    DROP
+    s6 POP
+    s6 POP
+    2DROP
+    s5 POP
+    s5 POP	//  index collection_address sender_address op query_id
+    0x2fcb26a2 PUSHINT	//  index collection_address sender_address op query_id _159
+    s1 s2 XCHG	//  index collection_address sender_address query_id op _159
+    EQUAL	//  index collection_address sender_address query_id _160
+    IFJMP:<{	//  index collection_address sender_address query_id
+      0 PUSHINT	//  index collection_address sender_address query_id _161=0
+      0x8b771735 PUSHINT	//  index collection_address sender_address query_id _161=0 _162
+      s0 s5 XCHG
+      NEWC	//  _162 collection_address sender_address query_id _161=0 index _163
+      256 STU	//  _162 collection_address sender_address query_id _161=0 _165
+      s0 s4 XCHG2	//  _162 _161=0 sender_address query_id _165 collection_address
+      STSLICER	//  _162 _161=0 sender_address query_id _166
+      s2 s4 XCHG
+      64 PUSHINT	//  sender_address _161=0 _162 query_id _166 _167=64
+      send_msg INLINECALLDICT
+    }>	//  index collection_address sender_address query_id
+    4 BLKDROP	// 
+    16 PUSHPOW2DEC	//  _169=65535
+    THROWANY
+  }>
+  get_sft_data PROC:<{
+    // 
+    load_data INLINECALLDICT	//  init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
+  }>
+  get_wallet_address PROC:<{
+    //  owner_address
+    load_data INLINECALLDICT	//  owner_address _11 _12 _13 _14 _15 _16 _17
+    6 1 BLKDROP2	//  owner_address sft_wallet_code
+    MYADDR	//  owner_address sft_wallet_code _9
+    SWAP	//  owner_address _9 sft_wallet_code
+    calculate_user_sft_wallet_address INLINECALLDICT	//  _10
+  }>
+}END>c
