@@ -1,0 +1,9 @@
+;; use misc/params.fc instead of this one
+;; this file will be removed
+
+int workchain() asm "0 PUSHINT";
+
+() force_chain(slice addr) impure {
+  (int wc, _) = parse_std_addr(addr);
+  throw_unless(333, wc == workchain());
+}

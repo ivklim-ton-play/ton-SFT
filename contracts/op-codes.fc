@@ -1,0 +1,12 @@
+;; SFT wallet
+int op::transfer() asm "0x762eb591 PUSHINT";
+int op::transfer_notification() asm "0x3fd4d3e2 PUSHINT";
+int op::excesses() asm "0xd53276db PUSHINT";
+int op::burn() asm "0x3b4532df PUSHINT";
+int op::internal_transfer() asm "0x3ebaa40 PUSHINT";
+int op::burn_notification() asm "0x54df7713 PUSHINT";
+
+;; SFT Minter
+int op::mint() asm "21 PUSHINT";
+int op::withdraw() asm "22 PUSHINT";
+int op::change_config() asm "23 PUSHINT";
