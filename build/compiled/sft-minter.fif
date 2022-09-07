@@ -13,7 +13,7 @@ PROGRAM{
   DECLPROC transfer_admin_role
   DECLPROC recv_internal
   123935 DECLMETHOD get_sft_data
-  103289 DECLMETHOD get_wallet_address
+  75525 DECLMETHOD get_sft_wallet_address
   force_chain PROC:<{
     //  addr
     REWRITESTDADDR	//  _8 _9
@@ -446,7 +446,7 @@ PROGRAM{
     // 
     load_data INLINECALLDICT	//  init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
   }>
-  get_wallet_address PROC:<{
+  get_sft_wallet_address PROC:<{
     //  owner_address
     load_data INLINECALLDICT	//  owner_address _11 _12 _13 _14 _15 _16 _17
     6 1 BLKDROP2	//  owner_address sft_wallet_code

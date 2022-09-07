@@ -1,3 +1,4 @@
+import { sftCollection, sftMinter, sftWallet } from "./contract-constant-name";
 import { build } from "./utils/build-utils";
 import { compile } from "./utils/compile-utils";
 
@@ -6,10 +7,6 @@ async function main() {
   const PARAMS_FILE = "params.fc";
   const OP_CODES_FILE = "op-codes.fc";
   const SFT_UTILS = "sft-utils.fc";
-
-  const sftCollection = "sft-collection-editable";
-  const sftMinter = "sft-minter";
-  const sftWallet = "sft-wallet";
 
   // compilation func to fift
   compile(sftCollection, [STD_LIB_FILE, PARAMS_FILE, OP_CODES_FILE, SFT_UTILS]);

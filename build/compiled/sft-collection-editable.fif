@@ -13,10 +13,10 @@ PROGRAM{
   DECLPROC deploy_sft_minter
   DECLPROC send_royalty_params
   DECLPROC recv_internal
-  102491 DECLMETHOD get_collection_data
-  86582 DECLMETHOD get_sft_address_by_index
+  68356 DECLMETHOD get_sft_collection_data
+  66886 DECLMETHOD get_sft_minter_address_by_index
   85719 DECLMETHOD royalty_params
-  95712 DECLMETHOD get_sft_content
+  105326 DECLMETHOD get_sft_minter_content
   force_chain PROC:<{
     //  addr
     REWRITESTDADDR	//  _8 _9
@@ -314,7 +314,7 @@ PROGRAM{
     16 PUSHPOW2DEC	//  _100=65535
     THROWANY
   }>
-  get_collection_data PROC:<{
+  get_sft_collection_data PROC:<{
     // 
     load_data INLINECALLDICT	//  _10 _11 _12 _13 _14
     2DROP	//  owner_address next_item_index content
@@ -323,7 +323,7 @@ PROGRAM{
     DROP	//  owner_address next_item_index _8
     ROT	//  next_item_index _8 owner_address
   }>
-  get_sft_address_by_index PROC:<{
+  get_sft_minter_address_by_index PROC:<{
     //  index
     load_data INLINECALLDICT	//  index _11 _12 _13 _14 _15
     s1 s4 XCHG
@@ -343,7 +343,7 @@ PROGRAM{
     LDMSGADDR	//  _8 _11 _26 _25
     DROP	//  _8 _11 _14
   }>
-  get_sft_content PROC:<{
+  get_sft_minter_content PROC:<{
     //  index individual_sft_content
     NIP	//  individual_sft_content
     load_data INLINECALLDICT	//  individual_sft_content _23 _24 _25 _26 _27
