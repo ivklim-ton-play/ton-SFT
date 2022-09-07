@@ -188,7 +188,7 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
     return (init?, index, collection_address, total_supply, admin_address, individual_sft_content, sft_wallet_code);
 }
 
-slice get_wallet_address(slice owner_address) method_id {
+slice get_sft_wallet_address(slice owner_address) method_id {
      (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
     return calculate_user_sft_wallet_address(owner_address, my_address(), sft_wallet_code);
 }
