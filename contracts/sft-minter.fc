@@ -11,7 +11,8 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
   if (ds.slice_bits() > 0) {
     return (-1, index, collection_address, ds~load_coins(), ds~load_msg_addr(), ds~load_ref(), ds~load_ref());
   } else {
-    return (0, index, collection_address, ds~load_coins(), ds~load_msg_addr(), ds~load_ref(), ds~load_ref()); ;; nft not initialized yet
+    cell admin_address = begin_cell().store_uint(0,2).end_cell();
+    return (0, index, collection_address, 0, admin_address.begin_parse(), null(), null()); ;; nft not initialized yet
   }
 }
 
