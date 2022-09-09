@@ -5,7 +5,7 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
 ;; storage scheme
 ;; storage#_ index:uint64 collection_address:MsgAddress total_supply:Coins admin_address:MsgAddress individual_sft_content:^Cell sft_wallet_code:^Cell = Storage;
 
-(int, int, slice, int, slice, cell, cell) load_data() inline {
+(int, int, slice, int, slice, cell, cell) load_data() {
   slice ds = get_data().begin_parse();
   var (index, collection_address) = (ds~load_uint(64), ds~load_msg_addr());
   if (ds.slice_bits() > 0) {

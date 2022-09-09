@@ -12,7 +12,7 @@ async function main() {
     Address.parse(USER_ADDRESS)
   );
 
-  console.log(`SFT Wallet address: ${data?.toFriendly}`);
+  console.log(`SFT Wallet address: ${data?.toFriendly()}`);
 }
 
 main().catch((r) => console.log(r.response ?? r));

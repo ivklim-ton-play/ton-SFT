@@ -22,7 +22,7 @@ async function main() {
   const sftCollectionView = new SFTCollectionView(DefaultTestnetClient!);
   const sftCollectionUtils = new SFTCollectionUtils();
 
-  console.log("Getting the next index for NFT in the NFT-collection...");
+  console.log("Getting the next index for SFT Minter in the SFT-collection...");
 
   const collection = Address.parse(SFT_COLLECTION_ADDRESS);
 
