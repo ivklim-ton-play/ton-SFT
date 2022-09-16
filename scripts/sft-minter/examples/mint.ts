@@ -24,7 +24,7 @@ async function main() {
 
   const recipient = Address.parse(SFT_RECIPIENT_ADDRESS);
 
-  const sftAmount = 1;
+  const sftAmount = 10;
 
   await sendInternalMessageWithWallet({
     client: client,

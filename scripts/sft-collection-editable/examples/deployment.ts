@@ -25,7 +25,7 @@ async function main() {
   const [cllection_owner_wallet] = await GetWallet();
 
   const royalty = {
-    numerator: 6,
+    numerator: 8,
     denominator: 100,
     to: Address.parse(ROYALTY_ADDRESS),
   };

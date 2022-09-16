@@ -10,9 +10,9 @@ PROGRAM{
   DECLPROC send_royalty_params
   DECLPROC recv_internal
   102491 DECLMETHOD get_collection_data
-  86582 DECLMETHOD get_sft_address_by_index
+  92067 DECLMETHOD get_nft_address_by_index
+  68445 DECLMETHOD get_nft_content
   85719 DECLMETHOD royalty_params
-  95712 DECLMETHOD get_sft_content
   force_chain PROC:<{
     //  addr
     REWRITESTDADDR	//  _8 _9
@@ -275,7 +275,7 @@ PROGRAM{
     DROP	//  owner_address next_item_index _8
     ROT	//  next_item_index _8 owner_address
   }>
-  get_sft_address_by_index PROC:<{
+  get_nft_address_by_index PROC:<{
     //  index
     load_data INLINECALLDICT	//  index _11 _12 _13 _14 _15
     s1 s4 XCHG
@@ -284,6 +284,26 @@ PROGRAM{
     0 PUSHINT	//  state_init _9
     SWAP	//  _9 state_init
     calculate_sft_item_address CALLDICT	//  _10
+  }>
+  get_nft_content PROC:<{
+    //  index individual_content
+    NIP	//  individual_content
+    load_data INLINECALLDICT	//  individual_content _23 _24 _25 _26 _27
+    s2 s4 XCHG
+    4 BLKDROP	//  individual_content content
+    CTOS	//  individual_content cs
+    LDREF	//  individual_content _29 _28
+    NIP	//  individual_content cs
+    LDREF	//  individual_content _31 _30
+    DROP	//  individual_content _13
+    CTOS	//  individual_content common_content
+    1 PUSHINT	//  individual_content common_content _16=1
+    NEWC	//  individual_content common_content _16=1 _17
+    8 STU	//  individual_content common_content _19
+    SWAP	//  individual_content _19 common_content
+    STSLICER	//  individual_content _20
+    STREF	//  _21
+    ENDC	//  _22
   }>
   royalty_params PROC:<{
     // 
@@ -294,25 +314,5 @@ PROGRAM{
     16 LDU	//  _8 _11 rs
     LDMSGADDR	//  _8 _11 _26 _25
     DROP	//  _8 _11 _14
-  }>
-  get_sft_content PROC:<{
-    //  index individual_sft_content
-    NIP	//  individual_sft_content
-    load_data INLINECALLDICT	//  individual_sft_content _23 _24 _25 _26 _27
-    s2 s4 XCHG
-    4 BLKDROP	//  individual_sft_content content
-    CTOS	//  individual_sft_content cs
-    LDREF	//  individual_sft_content _29 _28
-    NIP	//  individual_sft_content cs
-    LDREF	//  individual_sft_content _31 _30
-    DROP	//  individual_sft_content _13
-    CTOS	//  individual_sft_content common_content
-    1 PUSHINT	//  individual_sft_content common_content _16=1
-    NEWC	//  individual_sft_content common_content _16=1 _17
-    8 STU	//  individual_sft_content common_content _19
-    SWAP	//  individual_sft_content _19 common_content
-    STSLICER	//  individual_sft_content _20
-    STREF	//  _21
-    ENDC	//  _22
   }>
 }END>c

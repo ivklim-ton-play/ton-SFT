@@ -12,8 +12,9 @@ PROGRAM{
   DECLPROC mint_sft_tokens
   DECLPROC transfer_admin_role
   DECLPROC recv_internal
-  123935 DECLMETHOD get_sft_data
-  75525 DECLMETHOD get_sft_wallet_address
+  106029 DECLMETHOD get_jetton_data
+  103289 DECLMETHOD get_wallet_address
+  68356 DECLMETHOD get_sft_collection_data
   force_chain PROC:<{
     //  addr
     REWRITESTDADDR	//  _8 _9
@@ -81,20 +82,23 @@ PROGRAM{
       LDVARUINT16	//  index collection_address _13=-1 _14 ds
       LDMSGADDR	//  index collection_address _13=-1 _14 _16 ds
       LDREF	//  index collection_address _13=-1 _14 _16 _18 ds
-      LDREF	//  index collection_address _13=-1 _14 _16 _18 _42 _41
+      LDREF	//  index collection_address _13=-1 _14 _16 _18 _44 _43
       DROP	//  index collection_address _13=-1 _14 _16 _18 _20
       s4 s6 XCHG
       s4 s5 XCHG	//  _13=-1 index collection_address _14 _16 _18 _20
     }>	//  index collection_address ds
-    0 PUSHINT	//  index collection_address ds _22=0
-    SWAP	//  index collection_address _22=0 ds
-    LDVARUINT16	//  index collection_address _22=0 _23 ds
-    LDMSGADDR	//  index collection_address _22=0 _23 _25 ds
-    LDREF	//  index collection_address _22=0 _23 _25 _27 ds
-    LDREF	//  index collection_address _22=0 _23 _25 _27 _50 _49
-    DROP	//  index collection_address _22=0 _23 _25 _27 _29
-    s4 s6 XCHG
-    s4 s5 XCHG	//  _22=0 index collection_address _23 _25 _27 _29
+    DROP	//  index collection_address
+    0 PUSHINT	//  index collection_address _23=0
+    NEWC	//  index collection_address _23=0 _24
+    2 STU	//  index collection_address _26
+    ENDC	//  index collection_address admin_address
+    0 PUSHINT	//  index collection_address admin_address _28=0
+    s0 s1 PUXC	//  index collection_address _29=0 _28=0 admin_address
+    CTOS	//  index collection_address _29=0 _28=0 _30
+    s1 s4 XCHG
+    s3 s3 s0 XCHG3
+    PUSHNULL
+    PUSHNULL	//  _28=0 index collection_address _29=0 _30 _31 _32
   }>
   save_data PROC:<{
     //  index collection_address total_supply admin_address individual_sft_content sft_wallet_code
@@ -257,7 +261,7 @@ PROGRAM{
       3 BLKDROP	// 
     }>	//  balance in_msg_body cs
     LDMSGADDR	//  balance in_msg_body sender_address cs
-    load_data INLINECALLDICT	//  balance in_msg_body sender_address cs init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
+    load_data CALLDICT	//  balance in_msg_body sender_address cs init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
     s0 s6 XCHG	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content init?
     NOT	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content _24
     IFJMP:<{	//  balance in_msg_body sender_address cs sft_wallet_code index collection_address total_supply admin_address individual_sft_content
@@ -442,16 +446,27 @@ PROGRAM{
     16 PUSHPOW2DEC	//  _169=65535
     THROWANY
   }>
-  get_sft_data PROC:<{
+  get_jetton_data PROC:<{
     // 
-    load_data INLINECALLDICT	//  init? index collection_address total_supply admin_address individual_sft_content sft_wallet_code
+    load_data CALLDICT	//  _9 _10 _11 _12 _13 _14 _15
+    s4 POP
+    s4 POP
+    s4 POP	//  admin_address individual_sft_content sft_wallet_code total_supply
+    s0 s3 XCHG
+    -1 PUSHINT
+    s1 s3 s3 XCHG3	//  total_supply _8=-1 admin_address individual_sft_content sft_wallet_code
   }>
-  get_sft_wallet_address PROC:<{
+  get_wallet_address PROC:<{
     //  owner_address
-    load_data INLINECALLDICT	//  owner_address _11 _12 _13 _14 _15 _16 _17
+    load_data CALLDICT	//  owner_address _11 _12 _13 _14 _15 _16 _17
     6 1 BLKDROP2	//  owner_address sft_wallet_code
     MYADDR	//  owner_address sft_wallet_code _9
     SWAP	//  owner_address _9 sft_wallet_code
     calculate_user_sft_wallet_address INLINECALLDICT	//  _10
+  }>
+  get_sft_collection_data PROC:<{
+    // 
+    load_data CALLDICT	//  _8 _9 _10 _11 _12 _13 _14
+    4 BLKDROP	//  init? index collection_address
   }>
 }END>c

@@ -13,10 +13,7 @@ export class SFTCollectionView {
   public async getSFTCollectionData(collection: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(
-          collection,
-          "get_sft_collection_data"
-        )
+        await this.tonClient.callGetMethod(collection, "get_collection_data")
     );
     if (result == null) return null;
 
@@ -33,7 +30,7 @@ export class SFTCollectionView {
       async () =>
         await this.tonClient.callGetMethod(
           collection,
-          "get_sft_minter_address_by_index",
+          "get_nft_address_by_index",
           [["int", index.toString()]]
         )
     );

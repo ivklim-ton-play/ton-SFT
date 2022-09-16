@@ -49,7 +49,6 @@ async function main() {
   await sendInternalMessageWithWallet({
     client: DefaultTestnetClient!,
     mnemonic: MNEMONIC_SENDER_WALLET!,
-
     to: collection,
     mode: SendMode.PAY_GAS_SEPARATLY,
     value: tonAmount,

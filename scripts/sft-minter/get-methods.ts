@@ -11,7 +11,26 @@ export class SFTMinter {
 
   public async getSFTMinterData(sftMinter: Address) {
     const result = await repeatIfFails(
-      async () => await this.tonClient.callGetMethod(sftMinter, "get_sft_data")
+      async () =>
+        await this.tonClient.callGetMethod(sftMinter, "get_jetton_data")
+    );
+    if (result == null) return null;
+
+    const stack = new TupleSlice(result.stack);
+
+    return {
+      total_supply: stack.readBigNumber(),
+      mintable: stack.readBoolean(),
+      admin_address: stack.readCell().beginParse().readAddress(),
+      individual_sft_content: stack.readCell(),
+      sft_wallet_code: stack.readCell(),
+    };
+  }
+
+  public async getSFTMinterCollectionData(sftMinter: Address) {
+    const result = await repeatIfFails(
+      async () =>
+        await this.tonClient.callGetMethod(sftMinter, "get_sft_collection_data")
     );
     if (result == null) return null;
 
@@ -21,21 +40,15 @@ export class SFTMinter {
       init: stack.readBoolean(),
       index: stack.readBigNumber(),
       collection_address: stack.readCell().beginParse().readAddress(),
-      total_supply: stack.readBigNumber(),
-      admin_address: stack.readCell().beginParse().readAddress(),
-      individual_sft_content: stack.readCell(),
-      sft_wallet_code: stack.readCell(),
     };
   }
 
   public async getSFTWalletAddress(sftMinter: Address, owner: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(
-          sftMinter,
-          "get_sft_wallet_address",
-          [packTvmStackSlice(owner)]
-        )
+        await this.tonClient.callGetMethod(sftMinter, "get_wallet_address", [
+          packTvmStackSlice(owner),
+        ])
     );
     if (result == null) return null;
 

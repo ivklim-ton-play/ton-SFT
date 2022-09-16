@@ -13,7 +13,7 @@ PROGRAM{
   DECLPROC burn_tokens
   DECLPROC on_bounce
   DECLPROC recv_internal
-  96553 DECLMETHOD get_sft_wallet_data
+  97026 DECLMETHOD get_wallet_data
   force_chain PROC:<{
     //  addr
     REWRITESTDADDR	//  _8 _9
@@ -406,7 +406,7 @@ PROGRAM{
     16 PUSHPOW2DEC	//  _42=65535
     THROWANY
   }>
-  get_sft_wallet_data PROC:<{
+  get_wallet_data PROC:<{
     // 
     load_data INLINECALLDICT	//  _1 _2 _3 _4
   }>

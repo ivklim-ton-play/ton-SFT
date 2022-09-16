@@ -8,7 +8,7 @@ export class SFTWalletView {
   public async getWalletData(sftWallet: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(sftWallet, "get_sft_wallet_data")
+        await this.tonClient.callGetMethod(sftWallet, "get_wallet_data")
     );
     if (result == null) return null;
 
