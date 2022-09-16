@@ -261,6 +261,6 @@ int gas_consumption() asm "10000000 PUSHINT"; ;; 0.01 TON
   throw(0xffff);
 }
 
-(int, slice, slice, cell) get_sft_wallet_data() method_id {
+(int, slice, slice, cell) get_wallet_data() method_id {
   return load_data();
 }

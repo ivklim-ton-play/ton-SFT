@@ -11,7 +11,8 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
   if (ds.slice_bits() > 0) {
     return (-1, index, collection_address, ds~load_coins(), ds~load_msg_addr(), ds~load_ref(), ds~load_ref());
   } else {
-    return (0, index, collection_address, ds~load_coins(), ds~load_msg_addr(), ds~load_ref(), ds~load_ref()); ;; nft not initialized yet
+    cell admin_address = begin_cell().store_uint(0,2).end_cell();
+    return (0, index, collection_address, 0, admin_address.begin_parse(), null(), null()); ;; nft not initialized yet
   }
 }
 
@@ -183,12 +184,17 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
     throw(0xffff);
 }
 
-(int, int, slice, int, slice, cell, cell) get_sft_data() method_id {
+(int, int, slice, cell, cell) get_jetton_data() method_id {
     (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
-    return (init?, index, collection_address, total_supply, admin_address, individual_sft_content, sft_wallet_code);
+    return (total_supply, -1, admin_address, individual_sft_content, sft_wallet_code);
 }
 
-slice get_sft_wallet_address(slice owner_address) method_id {
-     (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
+slice get_wallet_address(slice owner_address) method_id {
+    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
     return calculate_user_sft_wallet_address(owner_address, my_address(), sft_wallet_code);
+}
+
+(int, int, slice) get_sft_collection_data() method_id {
+    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
+    return (init?, index, collection_address);
 }
