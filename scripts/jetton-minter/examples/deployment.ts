@@ -6,9 +6,9 @@ import {
 import BN from "bn.js";
 import { Address, StateInit, beginCell, contractAddress } from "ton";
 import { getCellFromJson } from "../../utils/build-utils";
-import { sftMinter, sftWallet } from "../../contract-constant-name";
-import { ADMIN_ADDRESS } from "../../sft-collection-editable/constants";
-import { SFT_MINTER_DEPLOYMENT_PRICE } from "../constants";
+import { jettonMinter, jettonWallet } from "../../contract-constant-name";
+import { ADMIN_ADDRESS } from "../../jetton-collection-editable/constants";
+import { JETTON_MINTER_DEPLOYMENT_PRICE } from "../constants";
 
 async function main() {
   // ;; storage#_
@@ -16,18 +16,18 @@ async function main() {
   // collection_address:MsgAddress
   // total_supply:Coins
   // admin_address:MsgAddress
-  // individual_sft_content:^Cell
-  // sft_wallet_code:^Cell = Storage;
+  // individual_jetton_content:^Cell
+  // jetton_wallet_code:^Cell = Storage;
 
   const stateInit = new StateInit({
-    code: getCellFromJson(sftMinter),
+    code: getCellFromJson(jettonMinter),
     data: beginCell()
       .storeUint(1, 64)
       .storeAddress(null)
       .storeCoins(12)
       .storeAddress(Address.parse(ADMIN_ADDRESS))
       .storeRef(beginCell().storeBuffer(Buffer.from("")).endCell())
-      .storeRef(getCellFromJson(sftWallet))
+      .storeRef(getCellFromJson(jettonWallet))
       .endCell(),
   });
 
@@ -38,7 +38,7 @@ async function main() {
   });
 
   console.log(
-    "SFT minter address: ",
+    "Jetton minter address: ",
     addr.toFriendly({ urlSafe: true, bounceable: true })
   );
 
@@ -47,7 +47,7 @@ async function main() {
     mnemonic: MNEMONIC_SENDER_WALLET,
 
     to: addr,
-    value: SFT_MINTER_DEPLOYMENT_PRICE,
+    value: JETTON_MINTER_DEPLOYMENT_PRICE,
     stateInit: stateInit,
     deployCheck: true,
   });

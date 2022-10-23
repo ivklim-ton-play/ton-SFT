@@ -6,13 +6,13 @@ import {
 } from "../../simple-wallet/simple-wallet";
 import { getArgOrDefaultAddress } from "../../utils/script-utils";
 import { toNano, Address } from "ton";
-import { SFTWalletUtils } from "../utils";
-import { SFT_WALLET_GAS } from "../constants";
-import { SFTMinter } from "../../sft-minter/get-methods";
-import { SFT_MINTER_ADDRESS } from "../../sft-minter/constants";
+import { JettonWalletUtils } from "../utils";
+import { JETTON_WALLET_GAS } from "../constants";
+import { JettonMinter } from "../../jetton-minter/get-methods";
+import { JETTON_MINTER_ADDRESS } from "../../jetton-minter/constants";
 
 async function main() {
-  const sftMinter = getArgOrDefaultAddress(2, SFT_MINTER_ADDRESS);
+  const jettonMinter = getArgOrDefaultAddress(2, JETTON_MINTER_ADDRESS);
 
   const [senderWallet] = await GetWallet();
   const [recipientWallet] = await GetWallet(
@@ -21,23 +21,23 @@ async function main() {
     MNEMONIC_RECIPIENT_WALLET
   );
 
-  const sftWallet = await new SFTMinter(
+  const jettonWallet = await new JettonMinter(
     DefaultTestnetClient
-  ).getSFTWalletAddress(sftMinter, senderWallet.address);
+  ).getJettonWalletAddress(jettonMinter, senderWallet.address);
 
-  if (sftWallet == null) return false;
+  if (jettonWallet == null) return false;
 
-  const sftAmount = 10;
+  const jettonAmount = 10;
 
   return await sendInternalMessageWithWallet({
     bounce: true,
-    to: sftWallet!,
+    to: jettonWallet!,
     value: toNano(1), // responseTo address is specified, all excesses will go there
-    body: new SFTWalletUtils().packTransferSFTOp(
+    body: new JettonWalletUtils().packTransferJettonOp(
       recipientWallet.address,
-      sftAmount,
+      jettonAmount,
       senderWallet.address, // responseTo
-      SFT_WALLET_GAS,
+      JETTON_WALLET_GAS,
       42 // queryId
     ),
   });

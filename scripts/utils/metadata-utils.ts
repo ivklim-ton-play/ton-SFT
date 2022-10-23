@@ -7,9 +7,6 @@ export function packMetadataOffchain(url: string) {
     const len = url.length;
     const part1 = url.slice(0, len / 2);
     const part2 = url.slice(len / 2, len);
-    // console.log(part1);
-    // console.log(part2);
-    // console.log(part1 + part2);
 
     cell
       .storeBuffer(Buffer.from(part1))
@@ -19,12 +16,3 @@ export function packMetadataOffchain(url: string) {
   }
   return cell.endCell();
 }
-
-// unpack???
-// export function unpackMetadataOffchain(metadataCell: Cell) {
-//     return "";
-// }
-
-// export function packMetadataOnchain(metadata: string) {
-//     return beginCell().storeUint8(0).storeBuffer(Buffer.from(metadata)).endCell();
-// }

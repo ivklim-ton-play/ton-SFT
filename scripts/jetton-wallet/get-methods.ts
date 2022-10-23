@@ -2,22 +2,22 @@ import { Address, TupleSlice } from "ton";
 import { DefaultTestnetClient } from "../simple-wallet/simple-wallet";
 import { repeatIfFails } from "../utils/script-utils";
 
-export class SFTWalletView {
+export class JettonWalletView {
   public tonClient = DefaultTestnetClient;
 
-  public async getWalletData(sftWallet: Address) {
+  public async getWalletData(jettonWallet: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(sftWallet, "get_wallet_data")
+        await this.tonClient.callGetMethod(jettonWallet, "get_wallet_data")
     );
     if (result == null) return null;
 
     const stack = new TupleSlice(result.stack);
     return {
-      sftAmount: stack.readBigNumber(),
+      jettonAmount: stack.readBigNumber(),
       owner: stack.readCell().beginParse().readAddress(),
-      sftMinter: stack.readCell().beginParse().readAddress(),
-      sftWalletCode: stack.readCell(),
+      jettonMinter: stack.readCell().beginParse().readAddress(),
+      jettonWalletCode: stack.readCell(),
     };
   }
 }

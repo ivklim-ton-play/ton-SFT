@@ -1,10 +1,13 @@
 import { beginCell, Address, Cell } from "ton";
 import BN from "bn.js";
 import { MINT_OP } from "./constants";
-import { INTERNAL_TRANSFER_OP, SFT_WALLET_GAS } from "../sft-wallet/constants";
+import {
+  INTERNAL_TRANSFER_OP,
+  JETTON_WALLET_GAS,
+} from "../jetton-wallet/constants";
 
-export class SFTUtils {
-  public packMintSFTOp(
+export class JettonUtils {
+  public packMintJettonOp(
     mintFrom: Address | null,
     mintTo: Address,
     mintAmount: number | BN,
@@ -14,7 +17,7 @@ export class SFTUtils {
       .storeUint(MINT_OP, 32)
       .storeUint(queryId ?? 0, 64)
       .storeAddress(mintTo)
-      .storeCoins(SFT_WALLET_GAS)
+      .storeCoins(JETTON_WALLET_GAS)
       .storeRef(
         beginCell()
           .storeUint(INTERNAL_TRANSFER_OP, 32)
@@ -30,18 +33,18 @@ export class SFTUtils {
 
   public packInitCell(
     totalSupply: BN,
-    sftAdmin: Address,
-    sftContent: string,
-    sftWalletCode: Cell
+    jettonAdmin: Address,
+    jettonContent: string,
+    jettonWalletCode: Cell
   ) {
-    const sftContentCell = beginCell()
-      .storeBuffer(Buffer.from(sftContent))
+    const jettonContentCell = beginCell()
+      .storeBuffer(Buffer.from(jettonContent))
       .endCell();
     return beginCell()
       .storeCoins(totalSupply)
-      .storeAddress(sftAdmin)
-      .storeRef(sftContentCell)
-      .storeRef(sftWalletCode)
+      .storeAddress(jettonAdmin)
+      .storeRef(jettonContentCell)
+      .storeRef(jettonWalletCode)
       .endCell();
   }
 }

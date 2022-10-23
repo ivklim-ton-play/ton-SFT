@@ -1,3 +1,3 @@
-export const sftCollection = "sft-collection-editable";
-export const sftMinter = "sft-minter";
-export const sftWallet = "sft-wallet";
+export const jettonCollection = "jetton-collection-editable";
+export const jettonMinter = "jetton-minter";
+export const jettonWallet = "jetton-wallet";

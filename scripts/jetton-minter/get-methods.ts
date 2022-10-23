@@ -2,17 +2,17 @@ import { Address, TupleSlice, TonClient } from "ton";
 import { repeatIfFails } from "../utils/script-utils";
 import { packTvmStackSlice } from "../utils/ton-utils";
 
-export class SFTMinter {
+export class JettonMinter {
   protected tonClient: TonClient;
 
   constructor(client: TonClient) {
     this.tonClient = client;
   }
 
-  public async getSFTMinterData(sftMinter: Address) {
+  public async getJettonMinterData(jettonMinter: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(sftMinter, "get_jetton_data")
+        await this.tonClient.callGetMethod(jettonMinter, "get_jetton_data")
     );
     if (result == null) return null;
 
@@ -22,15 +22,18 @@ export class SFTMinter {
       total_supply: stack.readBigNumber(),
       mintable: stack.readBoolean(),
       admin_address: stack.readCell().beginParse().readAddress(),
-      individual_sft_content: stack.readCell(),
-      sft_wallet_code: stack.readCell(),
+      individual_jetton_content: stack.readCell(),
+      jetton_wallet_code: stack.readCell(),
     };
   }
 
-  public async getSFTMinterCollectionData(sftMinter: Address) {
+  public async getJettonMinterCollectionData(jettonMinter: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(sftMinter, "get_sft_collection_data")
+        await this.tonClient.callGetMethod(
+          jettonMinter,
+          "get_jetton_collection_data"
+        )
     );
     if (result == null) return null;
 
@@ -43,10 +46,10 @@ export class SFTMinter {
     };
   }
 
-  public async getSFTWalletAddress(sftMinter: Address, owner: Address) {
+  public async getJettonWalletAddress(jettonMinter: Address, owner: Address) {
     const result = await repeatIfFails(
       async () =>
-        await this.tonClient.callGetMethod(sftMinter, "get_wallet_address", [
+        await this.tonClient.callGetMethod(jettonMinter, "get_wallet_address", [
           packTvmStackSlice(owner),
         ])
     );

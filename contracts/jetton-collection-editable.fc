@@ -1,10 +1,10 @@
-;; SFT: semi-fungible token collection smart contract
+;; Jetton Collection smart contract
 
 ;; storage scheme
 ;; default#_ royalty_factor:uint16 royalty_base:uint16 royalty_address:MsgAddress = RoyaltyParams;
 ;; storage#_ owner_address:MsgAddress next_item_index:uint64
 ;;           ^[collection_content:^Cell common_content:^Cell]
-;;           sft_minter_code:^Cell
+;;           jetton_minter_code:^Cell
 ;;           royalty_params:^RoyaltyParams
 ;;           = Storage;
 
@@ -14,27 +14,27 @@
     (ds~load_msg_addr(), ;; owner_address
      ds~load_uint(64), ;; next_item_index
      ds~load_ref(), ;; content
-     ds~load_ref(), ;; sft_minter_code
+     ds~load_ref(), ;; jetton_minter_code
      ds~load_ref()  ;; royalty_params
      );
 }
 
-() save_data(slice owner_address, int next_item_index, cell content, cell sft_minter_code, cell royalty_params) impure inline {
+() save_data(slice owner_address, int next_item_index, cell content, cell jetton_minter_code, cell royalty_params) impure inline {
   set_data(begin_cell()
     .store_slice(owner_address)
     .store_uint(next_item_index, 64)
     .store_ref(content)
-    .store_ref(sft_minter_code)
+    .store_ref(jetton_minter_code)
     .store_ref(royalty_params)
     .end_cell());
 }
 
-cell calculate_sft_item_state_init(int item_index, cell sft_minter_code) {
+cell calculate_jetton_item_state_init(int item_index, cell jetton_minter_code) {
   cell data = begin_cell().store_uint(item_index, 64).store_slice(my_address()).end_cell();
-  return begin_cell().store_uint(0, 2).store_dict(sft_minter_code).store_dict(data).store_uint(0, 1).end_cell();
+  return begin_cell().store_uint(0, 2).store_dict(jetton_minter_code).store_dict(data).store_uint(0, 1).end_cell();
 }
 
-slice calculate_sft_item_address(int wc, cell state_init) {
+slice calculate_jetton_item_address(int wc, cell state_init) {
   return begin_cell().store_uint(4, 3)
                      .store_int(wc, 8)
                      .store_uint(cell_hash(state_init), 256)
@@ -42,16 +42,16 @@ slice calculate_sft_item_address(int wc, cell state_init) {
                      .begin_parse();
 }
 
-() deploy_sft_minter(int item_index, cell sft_minter_code, int amount, cell sft_content) impure {
-  cell state_init = calculate_sft_item_state_init(item_index, sft_minter_code);
-  slice sft_address = calculate_sft_item_address(workchain(), state_init);
+() deploy_jetton_minter(int item_index, cell jetton_minter_code, int amount, cell jetton_content) impure {
+  cell state_init = calculate_jetton_item_state_init(item_index, jetton_minter_code);
+  slice jetton_address = calculate_jetton_item_address(workchain(), state_init);
   var msg = begin_cell()
             .store_uint(0x18, 6)
-            .store_slice(sft_address)
+            .store_slice(jetton_address)
             .store_coins(amount)
             .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
             .store_ref(state_init)
-            .store_ref(sft_content);
+            .store_ref(jetton_content);
   send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
 }
 
@@ -82,7 +82,7 @@ slice calculate_sft_item_address(int wc, cell state_init) {
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
 
-    var (owner_address, next_item_index, content, sft_minter_code, royalty_params) = load_data();
+    var (owner_address, next_item_index, content, jetton_minter_code, royalty_params) = load_data();
 
     if (op == op::get_royalty_params()) {
         send_royalty_params(sender_address, query_id, royalty_params.begin_parse());
@@ -92,18 +92,18 @@ slice calculate_sft_item_address(int wc, cell state_init) {
     throw_unless(401, equal_slices(sender_address, owner_address));
 
 
-    if (op == 1) { ;; deploy new sft
+    if (op == 1) { ;; deploy new jetton
       int item_index = in_msg_body~load_uint(64);
       throw_unless(402, item_index <= next_item_index);
       var is_last = item_index == next_item_index;
-      deploy_sft_minter(item_index, sft_minter_code, in_msg_body~load_coins(), in_msg_body~load_ref());
+      deploy_jetton_minter(item_index, jetton_minter_code, in_msg_body~load_coins(), in_msg_body~load_ref());
       if (is_last) {
         next_item_index += 1;
-        save_data(owner_address, next_item_index, content, sft_minter_code, royalty_params);
+        save_data(owner_address, next_item_index, content, jetton_minter_code, royalty_params);
       }
       return ();
     }
-    if (op == 2) { ;; batch deploy of new sfts
+    if (op == 2) { ;; batch deploy of new jettons
       int counter = 0;
       cell deploy_list = in_msg_body~load_ref();
       do {
@@ -115,22 +115,22 @@ slice calculate_sft_item_address(int wc, cell state_init) {
           }
 
           throw_unless(403 + counter, item_index <= next_item_index);
-          deploy_sft_minter(item_index, sft_minter_code, item~load_coins(), item~load_ref());
+          deploy_jetton_minter(item_index, jetton_minter_code, item~load_coins(), item~load_ref());
           if (item_index == next_item_index) {
             next_item_index += 1;
           }
         }
       } until ( ~ f?);
-      save_data(owner_address, next_item_index, content, sft_minter_code, royalty_params);
+      save_data(owner_address, next_item_index, content, jetton_minter_code, royalty_params);
       return ();
     }
     if (op == 3) { ;; change owner
       slice new_owner = in_msg_body~load_msg_addr();
-      save_data(new_owner, next_item_index, content, sft_minter_code, royalty_params);
+      save_data(new_owner, next_item_index, content, jetton_minter_code, royalty_params);
       return ();
     }
     if (op == 4) { ;; change content
-      save_data(owner_address, next_item_index, in_msg_body~load_ref(), sft_minter_code, in_msg_body~load_ref());
+      save_data(owner_address, next_item_index, in_msg_body~load_ref(), jetton_minter_code, in_msg_body~load_ref());
       return ();
     }
     throw(0xffff);
@@ -145,9 +145,9 @@ slice calculate_sft_item_address(int wc, cell state_init) {
 }
 
 slice get_nft_address_by_index(int index) method_id {
-    var (_, _, _, sft_minter_code, _) = load_data();
-    cell state_init = calculate_sft_item_state_init(index, sft_minter_code);
-    return calculate_sft_item_address(workchain(), state_init);
+    var (_, _, _, jetton_minter_code, _) = load_data();
+    cell state_init = calculate_jetton_item_state_init(index, jetton_minter_code);
+    return calculate_jetton_item_address(workchain(), state_init);
 }
 
 cell get_nft_content(int index, cell individual_content) method_id {

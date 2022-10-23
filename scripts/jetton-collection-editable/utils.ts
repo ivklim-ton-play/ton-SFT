@@ -8,10 +8,10 @@ import {
 } from "ton";
 import { packMetadataOffchain } from "../utils/metadata-utils";
 import BN from "bn.js";
-import { SFTUtils } from "../sft-minter/utils";
-import { SFT_MINTER_DEPLOYMENT_PRICE } from "../sft-minter/constants";
+import { JettonUtils } from "../jetton-minter/utils";
+import { JETTON_MINTER_DEPLOYMENT_PRICE } from "../jetton-minter/constants";
 
-export class SFTCollectionUtils {
+export class JettonCollectionUtils {
   public packRoyaltyParams(p: number, pDenominator: number, payTo: Address) {
     return beginCell()
       .storeUint(p, 16)
@@ -20,15 +20,15 @@ export class SFTCollectionUtils {
       .endCell();
   }
 
-  public packSFTCollectionContent(
+  public packJettonCollectionContent(
     collectionMetadata: string,
-    commonSFTUrl: string
+    commonJettonUrl: string
   ) {
     const collection_metadata = packMetadataOffchain(collectionMetadata);
-    const common_sft_metadata = packMetadataOffchain(commonSFTUrl);
+    const common_jetton_metadata = packMetadataOffchain(commonJettonUrl);
     return beginCell()
       .storeRef(collection_metadata)
-      .storeRef(common_sft_metadata)
+      .storeRef(common_jetton_metadata)
       .endCell();
   }
 
@@ -41,7 +41,7 @@ export class SFTCollectionUtils {
   }
 
   public packChangeContentMessage(
-    content: { collectionMetadataUrl: string; sftMetadataCommonUrl: string },
+    content: { collectionMetadataUrl: string; jettonMetadataCommonUrl: string },
     royaltyParams: {
       percentNumerator: number;
       percentDenominator: number;
@@ -49,9 +49,9 @@ export class SFTCollectionUtils {
     },
     queryId?: BN
   ) {
-    const new_content = this.packSFTCollectionContent(
+    const new_content = this.packJettonCollectionContent(
       content.collectionMetadataUrl,
-      content.sftMetadataCommonUrl
+      content.jettonMetadataCommonUrl
     );
     const royalty_params = this.packRoyaltyParams(
       royaltyParams.percentNumerator,
@@ -67,27 +67,27 @@ export class SFTCollectionUtils {
       .endCell();
   }
 
-  public packMintSFTMinterMessage(
+  public packMintJettonMinterMessage(
     index: BN,
     totalSupply: BN,
-    sftAdmin: Address,
-    sftContent: string,
-    sftWalletCode: Cell,
+    jettonAdmin: Address,
+    jettonContent: string,
+    jettonWalletCode: Cell,
     queryId?: BN
   ) {
-    const sftMinterInitOperation = new SFTUtils().packInitCell(
+    const jettonMinterInitOperation = new JettonUtils().packInitCell(
       totalSupply,
-      sftAdmin,
-      sftContent,
-      sftWalletCode
+      jettonAdmin,
+      jettonContent,
+      jettonWalletCode
     );
 
     return beginCell()
       .storeUint(1, 32) // operation_id
       .storeUint(queryId ?? index, 64) //query_id
       .storeUint(index, 64)
-      .storeCoins(SFT_MINTER_DEPLOYMENT_PRICE)
-      .storeRef(sftMinterInitOperation)
+      .storeCoins(JETTON_MINTER_DEPLOYMENT_PRICE)
+      .storeRef(jettonMinterInitOperation)
       .endCell();
   }
 }

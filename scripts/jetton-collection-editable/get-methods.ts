@@ -3,14 +3,14 @@ import BN from "bn.js";
 import { DefaultTestnetClient } from "../simple-wallet/simple-wallet";
 import { repeatIfFails } from "../utils/script-utils";
 
-export class SFTCollectionView {
+export class JettonCollectionView {
   protected tonClient: TonClient;
 
   constructor(tonClient?: TonClient) {
     this.tonClient = tonClient ?? DefaultTestnetClient;
   }
 
-  public async getSFTCollectionData(collection: Address) {
+  public async getJettonCollectionData(collection: Address) {
     const result = await repeatIfFails(
       async () =>
         await this.tonClient.callGetMethod(collection, "get_collection_data")
@@ -19,13 +19,13 @@ export class SFTCollectionView {
 
     const stack = new TupleSlice(result.stack);
     return {
-      nextSFTMinterIndex: stack.readBigNumber(),
+      nextJettonMinterIndex: stack.readBigNumber(),
       metadata: stack.readCell(),
       owner: stack.readCell().beginParse().readAddress(),
     };
   }
 
-  public async getSFTAddressByIndex(collection: Address, index: BN) {
+  public async getJettonAddressByIndex(collection: Address, index: BN) {
     const result = await repeatIfFails(
       async () =>
         await this.tonClient.callGetMethod(

@@ -8,32 +8,32 @@ import { getArgOrDefaultAddress } from "../../utils/script-utils";
 
 import { Address } from "ton";
 import {
-  MINT_SFT_GAS,
-  SFT_MINTER_ADDRESS,
-  SFT_RECIPIENT_ADDRESS,
+  MINT_JETTON_GAS,
+  JETTON_MINTER_ADDRESS,
+  JETTON_RECIPIENT_ADDRESS,
 } from "../constants";
-import { SFT_WALLET_GAS } from "../../sft-wallet/constants";
-import { SFTMinter } from "../get-methods";
-import { SFTUtils } from "../utils";
+import { JETTON_WALLET_GAS } from "../../jetton-wallet/constants";
+import { JettonMinter } from "../get-methods";
+import { JettonUtils } from "../utils";
 
 async function main() {
   const client = DefaultTestnetClient!;
   const mnemonic = MNEMONIC_SENDER_WALLET!;
 
-  const sftMinter = Address.parse(SFT_MINTER_ADDRESS);
+  const jettonMinter = Address.parse(JETTON_MINTER_ADDRESS);
 
-  const recipient = Address.parse(SFT_RECIPIENT_ADDRESS);
+  const recipient = Address.parse(JETTON_RECIPIENT_ADDRESS);
 
-  const sftAmount = 10;
+  const jettonAmount = 10;
 
   await sendInternalMessageWithWallet({
     client: client,
     mnemonic: mnemonic,
 
     bounce: true,
-    to: sftMinter!,
-    value: SFT_WALLET_GAS.add(MINT_SFT_GAS),
-    body: new SFTUtils().packMintSFTOp(null, recipient, sftAmount, 0),
+    to: jettonMinter!,
+    value: JETTON_WALLET_GAS.add(MINT_JETTON_GAS),
+    body: new JettonUtils().packMintJettonOp(null, recipient, jettonAmount, 0),
   });
 }
 

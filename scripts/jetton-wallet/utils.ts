@@ -2,10 +2,10 @@ import { beginCell, Address, Cell } from "ton";
 import BN from "bn.js";
 import { TRANSFER_OP } from "./constants";
 
-export class SFTWalletUtils {
-  public packTransferSFTOp(
+export class JettonWalletUtils {
+  public packTransferJettonOp(
     recipient: Address,
-    sftAmount: number | BN,
+    jettonAmount: number | BN,
     responseTo?: Address,
     forwardTonAmount?: number | BN,
     queryId?: number | BN
@@ -13,7 +13,7 @@ export class SFTWalletUtils {
     return beginCell()
       .storeUint(TRANSFER_OP, 32)
       .storeUint(queryId ?? 0, 64)
-      .storeCoins(sftAmount)
+      .storeCoins(jettonAmount)
       .storeAddress(recipient)
       .storeAddress(responseTo ?? null) // op::excesses()
       .storeDict(null) // custom_payload ??
