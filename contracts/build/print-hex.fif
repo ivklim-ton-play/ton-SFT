@@ -1,0 +1,18 @@
+#!/usr/bin/fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+."sft-minter:" cr
+
+"sft-minter.fif" include
+2 boc+>B dup Bx. cr
+
+."sft-wallet:" cr
+
+"sft-wallet.fif" include
+2 boc+>B dup Bx. cr
+
+."sft-collection-editable:" cr
+
+"sft-collection-editable-code.fif" include
+2 boc+>B dup Bx. cr cr
