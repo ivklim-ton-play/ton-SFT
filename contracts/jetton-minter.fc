@@ -1,9 +1,9 @@
-;; SFT minter smart contract
+;; Jetton minter smart contract
 
 int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
 
 ;; storage scheme
-;; storage#_ index:uint64 collection_address:MsgAddress total_supply:Coins admin_address:MsgAddress individual_sft_content:^Cell sft_wallet_code:^Cell = Storage;
+;; storage#_ index:uint64 collection_address:MsgAddress total_supply:Coins admin_address:MsgAddress individual_jetton_content:^Cell jetton_wallet_code:^Cell = Storage;
 
 (int, int, slice, int, slice, cell, cell) load_data() {
   slice ds = get_data().begin_parse();
@@ -16,14 +16,14 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
   }
 }
 
-() save_data(int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) impure inline {
+() save_data(int index, slice collection_address, int total_supply, slice admin_address, cell individual_jetton_content, cell jetton_wallet_code) impure inline {
   set_data(begin_cell()
             .store_uint(index, 64)
             .store_slice(collection_address)
             .store_coins(total_supply)
             .store_slice(admin_address)
-            .store_ref(individual_sft_content)
-            .store_ref(sft_wallet_code)
+            .store_ref(individual_jetton_content)
+            .store_ref(jetton_wallet_code)
            .end_cell()
           );
 }
@@ -44,9 +44,9 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
   send_raw_message(msg.end_cell(), send_mode);
 }
 
-() mint_sft_tokens(slice to_address, cell sft_wallet_code, int ton_amount, cell internal_transfer_op) impure {
-  cell state_init = calculate_sft_wallet_state_init(to_address, my_address(), sft_wallet_code);
-  slice to_wallet_address = calculate_sft_wallet_address(state_init);
+() mint_jetton_tokens(slice to_address, cell jetton_wallet_code, int ton_amount, cell internal_transfer_op) impure {
+  cell state_init = calculate_jetton_wallet_state_init(to_address, my_address(), jetton_wallet_code);
+  slice to_wallet_address = calculate_jetton_wallet_address(state_init);
   var msg = begin_cell()
     .store_uint(0x18, 6)
     .store_slice(to_wallet_address)
@@ -57,13 +57,13 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
   send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
 }
 
-() transfer_admin_role(int balance, int index, slice collection_address, slice admin_address, cell individual_sft_content, slice sender_address, int query_id, slice in_msg_body, int fwd_fees, int total_supply, cell sft_wallet_code) impure inline {
+() transfer_admin_role(int balance, int index, slice collection_address, slice admin_address, cell individual_jetton_content, slice sender_address, int query_id, slice in_msg_body, int fwd_fees, int total_supply, cell jetton_wallet_code) impure inline {
     throw_unless(401, equal_slices(sender_address, admin_address));
 
     slice new_admin_address = in_msg_body~load_msg_addr();
     force_chain(new_admin_address);
     slice response_destination = in_msg_body~load_msg_addr();
-    in_msg_body~load_int(1); ;; this sft minter don't use custom_payload
+    in_msg_body~load_int(1); ;; this jetton minter don't use custom_payload
     int forward_amount = in_msg_body~load_coins();
 
     int rest_amount = balance - min_tons_for_storage();
@@ -75,7 +75,7 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
       rest_amount -= fwd_fees;
     }
 
-    throw_unless(402, rest_amount >= 0); ;; base sft minter spends fixed amount of gas, will not check for response
+    throw_unless(402, rest_amount >= 0); ;; base jetton minter spends fixed amount of gas, will not check for response
 
     if (forward_amount) {
       send_msg(new_admin_address, forward_amount, op::ownership_assigned(), query_id, begin_cell().store_slice(admin_address).store_slice(in_msg_body), 1);  ;; paying fees, revert on errors
@@ -85,7 +85,7 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
       send_msg(response_destination, rest_amount, op::excesses(), query_id, null(), 1); ;; paying fees, revert on errors
     }
 
-    save_data(index, collection_address, total_supply, new_admin_address, individual_sft_content, sft_wallet_code);
+    save_data(index, collection_address, total_supply, new_admin_address, individual_jetton_content, jetton_wallet_code);
 }
 
 () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -105,8 +105,8 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
      slice collection_address,
      int total_supply,
      slice admin_address,
-     cell individual_sft_content,
-     cell sft_wallet_code) = load_data();
+     cell individual_jetton_content,
+     cell jetton_wallet_code) = load_data();
 
     if (~ init?) {
       throw_unless(405, equal_slices(collection_address, sender_address));
@@ -124,20 +124,20 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
         cell internal_transfer_op = in_msg_body~load_ref();
         slice internal_transfer_op_cs = internal_transfer_op.begin_parse();
         internal_transfer_op_cs~skip_bits(32 + 64); ;; op + query_id
-        int sft_amount = internal_transfer_op_cs~load_coins();
+        int jetton_amount = internal_transfer_op_cs~load_coins();
         
-        mint_sft_tokens(to_address, sft_wallet_code, ton_amount, internal_transfer_op);
-        save_data(index, collection_address, total_supply + sft_amount, admin_address, individual_sft_content, sft_wallet_code);
+        mint_jetton_tokens(to_address, jetton_wallet_code, ton_amount, internal_transfer_op);
+        save_data(index, collection_address, total_supply + jetton_amount, admin_address, individual_jetton_content, jetton_wallet_code);
         return ();
     }
 
     if (op == op::burn_notification()) {
-        int sft_amount = in_msg_body~load_coins();
+        int jetton_amount = in_msg_body~load_coins();
         slice from_address = in_msg_body~load_msg_addr();
         throw_unless(74,
-            equal_slices(calculate_user_sft_wallet_address(from_address, my_address(), sft_wallet_code), sender_address)
+            equal_slices(calculate_user_jetton_wallet_address(from_address, my_address(), jetton_wallet_code), sender_address)
         );
-        save_data(index, collection_address, total_supply - sft_amount, admin_address, individual_sft_content, sft_wallet_code);
+        save_data(index, collection_address, total_supply - jetton_amount, admin_address, individual_jetton_content, jetton_wallet_code);
         slice response_address = in_msg_body~load_msg_addr();
         if (response_address.preload_uint(2) != 0) {
           var msg = begin_cell()
@@ -155,13 +155,13 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
     if (op == op::change_admin()) { ;; change admin
         throw_unless(73, equal_slices(sender_address, admin_address));
         slice new_admin_address = in_msg_body~load_msg_addr();
-        save_data(index, collection_address, total_supply, new_admin_address, individual_sft_content, sft_wallet_code);
+        save_data(index, collection_address, total_supply, new_admin_address, individual_jetton_content, jetton_wallet_code);
         return ();
     }
 
-    if (op == op::change_individual_sft_content()) { ;; change individual_sft_content, delete this for immutable tokens
+    if (op == op::change_individual_jetton_content()) { ;; change individual_jetton_content, delete this for immutable tokens
         throw_unless(73, equal_slices(sender_address, admin_address));
-        save_data(index, collection_address, total_supply, admin_address, in_msg_body~load_ref(), sft_wallet_code);
+        save_data(index, collection_address, total_supply, admin_address, in_msg_body~load_ref(), jetton_wallet_code);
         return ();
     }
 
@@ -172,7 +172,7 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
     int fwd_fee = cs~load_coins(); ;; we use message fwd_fee for estimation of forward_payload costs
 
     if (op == op::transfer_ownership()) {
-      transfer_admin_role(balance, index, collection_address, admin_address, individual_sft_content, sender_address, query_id, in_msg_body, fwd_fee, total_supply, sft_wallet_code);
+      transfer_admin_role(balance, index, collection_address, admin_address, individual_jetton_content, sender_address, query_id, in_msg_body, fwd_fee, total_supply, jetton_wallet_code);
       return ();
     }
 
@@ -185,16 +185,16 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
 }
 
 (int, int, slice, cell, cell) get_jetton_data() method_id {
-    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
-    return (total_supply, -1, admin_address, individual_sft_content, sft_wallet_code);
+    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_jetton_content, cell jetton_wallet_code) = load_data();
+    return (total_supply, -1, admin_address, individual_jetton_content, jetton_wallet_code);
 }
 
 slice get_wallet_address(slice owner_address) method_id {
-    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
-    return calculate_user_sft_wallet_address(owner_address, my_address(), sft_wallet_code);
+    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_jetton_content, cell jetton_wallet_code) = load_data();
+    return calculate_user_jetton_wallet_address(owner_address, my_address(), jetton_wallet_code);
 }
 
-(int, int, slice) get_sft_collection_data() method_id {
-    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_sft_content, cell sft_wallet_code) = load_data();
+(int, int, slice) get_jetton_collection_data() method_id {
+    (int init?, int index, slice collection_address, int total_supply, slice admin_address, cell individual_jetton_content, cell jetton_wallet_code) = load_data();
     return (init?, index, collection_address);
 }
