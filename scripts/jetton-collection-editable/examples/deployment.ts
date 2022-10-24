@@ -5,7 +5,7 @@ import {
   sendInternalMessageWithWallet,
 } from "../../simple-wallet/simple-wallet";
 import BN from "bn.js";
-import { Address, StateInit, beginCell, contractAddress } from "ton";
+
 import {
   ROYALTY_ADDRESS,
   JETTON_COLLECTION_DEPLOYMENT_PRICE,
@@ -20,6 +20,7 @@ import {
   jettonWallet,
 } from "../../contract-constant-name";
 import { JettonCollectionUtils } from "../utils";
+import { Address, beginCell, contractAddress, StateInit } from "ton";
 
 async function main() {
   const [cllection_owner_wallet] = await GetWallet();
