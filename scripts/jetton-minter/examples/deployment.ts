@@ -8,7 +8,10 @@ import { Address, StateInit, beginCell, contractAddress } from "ton";
 import { getCellFromJson } from "../../utils/build-utils";
 import { jettonMinter, jettonWallet } from "../../contract-constant-name";
 import { ADMIN_ADDRESS } from "../../jetton-collection-editable/constants";
-import { JETTON_MINTER_DEPLOYMENT_PRICE } from "../constants";
+import {
+  JETTON_METADATA_URL,
+  JETTON_MINTER_DEPLOYMENT_PRICE,
+} from "../constants";
 
 async function main() {
   // ;; storage#_
@@ -26,7 +29,9 @@ async function main() {
       .storeAddress(null)
       .storeCoins(12)
       .storeAddress(Address.parse(ADMIN_ADDRESS))
-      .storeRef(beginCell().storeBuffer(Buffer.from("")).endCell())
+      .storeRef(
+        beginCell().storeBuffer(Buffer.from(JETTON_METADATA_URL)).endCell()
+      )
       .storeRef(getCellFromJson(jettonWallet))
       .endCell(),
   });

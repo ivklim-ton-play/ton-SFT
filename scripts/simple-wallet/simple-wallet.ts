@@ -23,9 +23,9 @@ export const DefaultTestnetClient = new TonClient({
 export const MNEMONIC_SENDER_WALLET = stringToArray(
   process.env.SECRET_MNEMONIC_SENDER
 );
-export const MNEMONIC_RECIPIENT_WALLET = stringToArray(
-  process.env.SECRET_MNEMONIC_RECIPIENT
-);
+// export const MNEMONIC_RECIPIENT_WALLET = stringToArray(
+//   process.env.SECRET_MNEMONIC_RECIPIENT
+// );
 
 export const MIN_OP_GAS = toNano(1);
 

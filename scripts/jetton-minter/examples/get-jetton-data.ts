@@ -13,7 +13,11 @@ async function main() {
   console.log(`Total supply ${fromNano(data?.total_supply ?? 0)}`);
   console.log(`Mintable: ${data?.mintable}`);
   console.log(`Admin address:  ${data?.admin_address?.toFriendly()}`);
-  console.log(`Content:  ${data?.individual_jetton_content}`);
+
+  const content = data?.individual_jetton_content.beginParse();
+  console.log(content?.readUint(8));
+
+  console.log(`Content:  ${content?.readRemainingBytes().toString()}`);
 }
 
 main().catch((r) => console.log(r.response ?? r));

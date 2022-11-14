@@ -11,7 +11,7 @@ import {
   JETTON_COLLECTION_DEPLOYMENT_PRICE,
   JETTON_COLLECTION_OWNER_ADDRESS,
   JETTON_METADATA_COMMON_URL,
-  JETTON_METADATA_URL,
+  JETTON_COLLECTION_METADATA_URL,
 } from "../constants";
 import { getCellFromJson } from "../../utils/build-utils";
 import {
@@ -47,7 +47,7 @@ async function main() {
       .storeUint(0, 64)
       .storeRef(
         utils.packJettonCollectionContent(
-          JETTON_METADATA_URL,
+          JETTON_COLLECTION_METADATA_URL,
           JETTON_METADATA_COMMON_URL
         )
       )

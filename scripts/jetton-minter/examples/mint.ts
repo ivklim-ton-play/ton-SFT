@@ -11,6 +11,7 @@ import {
   MINT_JETTON_GAS,
   JETTON_MINTER_ADDRESS,
   JETTON_RECIPIENT_ADDRESS,
+  JETTON_AMOUNT,
 } from "../constants";
 import { JETTON_WALLET_GAS } from "../../jetton-wallet/constants";
 import { JettonMinter } from "../get-methods";
@@ -24,7 +25,7 @@ async function main() {
 
   const recipient = Address.parse(JETTON_RECIPIENT_ADDRESS);
 
-  const jettonAmount = 10;
+  const jettonAmount = JETTON_AMOUNT;
 
   await sendInternalMessageWithWallet({
     client: client,

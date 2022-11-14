@@ -38,6 +38,7 @@ export class JettonUtils {
     jettonWalletCode: Cell
   ) {
     const jettonContentCell = beginCell()
+      .storeUint8(1)
       .storeBuffer(Buffer.from(jettonContent))
       .endCell();
     return beginCell()

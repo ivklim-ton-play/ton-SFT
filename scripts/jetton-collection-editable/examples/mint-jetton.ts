@@ -12,11 +12,15 @@ import {
   JETTON_COLLECTION_ADDRESS,
   JETTON_COLLECTION_GAS_FOR_MINT,
 } from "../constants";
-import { JETTON_MINTER_DEPLOYMENT_PRICE } from "../../jetton-minter/constants";
+import {
+  JETTON_METADATA_URL,
+  JETTON_MINTER_DEPLOYMENT_PRICE,
+} from "../../jetton-minter/constants";
 import { getCellFromJson } from "../../utils/build-utils";
 import { jettonWallet } from "../../contract-constant-name";
 
-const getJettonContent = (index: BN) => ""; // `/${index.addn(1)}`;
+const getJettonContent = (index: BN) =>
+  JETTON_METADATA_URL + index.addn(1).toString() + ".json"; // `/${index.addn(1)}`;
 
 async function main() {
   const jettonCollectionView = new JettonCollectionView(DefaultTestnetClient!);
@@ -41,6 +45,7 @@ async function main() {
   ); // 0.017 TON for operation
 
   const jettonContent = getJettonContent(nextIndex);
+  console.log("jettonContent: " + jettonContent);
   mintOperation = jettonCollectionUtils.packMintJettonMinterMessage(
     nextIndex,
     new BN(0),

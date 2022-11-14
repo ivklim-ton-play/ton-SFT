@@ -336,22 +336,20 @@ PROGRAM{
   get_nft_content PROC:<{
     //  index individual_content
     NIP	//  individual_content
-    load_data INLINECALLDICT	//  individual_content _23 _24 _25 _26 _27
+    load_data INLINECALLDICT	//  individual_content _20 _21 _22 _23 _24
     s2 s4 XCHG
     4 BLKDROP	//  individual_content content
     CTOS	//  individual_content cs
-    LDREF	//  individual_content _29 _28
+    LDREF	//  individual_content _26 _25
     NIP	//  individual_content cs
-    LDREF	//  individual_content _31 _30
+    LDREF	//  individual_content _28 _27
     DROP	//  individual_content _13
     CTOS	//  individual_content common_content
-    1 PUSHINT	//  individual_content common_content _16=1
-    NEWC	//  individual_content common_content _16=1 _17
-    8 STU	//  individual_content common_content _19
-    SWAP	//  individual_content _19 common_content
-    STSLICER	//  individual_content _20
-    STREF	//  _21
-    ENDC	//  _22
+    NEWC	//  individual_content common_content _16
+    SWAP	//  individual_content _16 common_content
+    STSLICER	//  individual_content _17
+    STREF	//  _18
+    ENDC	//  _19
   }>
   royalty_params PROC:<{
     // 
