@@ -2,17 +2,17 @@
 "TonUtil.fif" include
 "Asm.fif" include
 
-."sft-minter:" cr
+."jetton-minter:" cr
 
-"sft-minter.fif" include
+"jetton-minter.fif" include
 2 boc+>B dup Bx. cr
 
-."sft-wallet:" cr
+."jetton-wallet:" cr
 
-"sft-wallet.fif" include
+"jetton-wallet.fif" include
 2 boc+>B dup Bx. cr
 
-."sft-collection-editable:" cr
+."jetton-collection-editable:" cr
 
-"sft-collection-editable-code.fif" include
+"jetton-collection-editable-code.fif" include
 2 boc+>B dup Bx. cr cr
