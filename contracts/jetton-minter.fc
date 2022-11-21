@@ -152,13 +152,6 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
         return ();
     }
 
-    if (op == op::change_admin()) { ;; change admin
-        throw_unless(73, equal_slices(sender_address, admin_address));
-        slice new_admin_address = in_msg_body~load_msg_addr();
-        save_data(index, collection_address, total_supply, new_admin_address, individual_jetton_content, jetton_wallet_code);
-        return ();
-    }
-
     if (op == op::change_individual_jetton_content()) { ;; change individual_jetton_content, delete this for immutable tokens
         throw_unless(73, equal_slices(sender_address, admin_address));
         save_data(index, collection_address, total_supply, admin_address, in_msg_body~load_ref(), jetton_wallet_code);
@@ -171,6 +164,11 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
     cs~load_coins(); ;; skip ihr_fee
     int fwd_fee = cs~load_coins(); ;; we use message fwd_fee for estimation of forward_payload costs
 
+    if (op == op::change_admin()) { ;; change admin
+      transfer_admin_role(balance, index, collection_address, admin_address, individual_jetton_content, sender_address, query_id, in_msg_body, fwd_fee, total_supply, jetton_wallet_code);
+      return ();
+    }
+
     if (op == op::transfer_ownership()) {
       transfer_admin_role(balance, index, collection_address, admin_address, individual_jetton_content, sender_address, query_id, in_msg_body, fwd_fee, total_supply, jetton_wallet_code);
       return ();
@@ -178,6 +176,20 @@ int min_tons_for_storage() asm "50000000 PUSHINT"; ;; 0.05 TON
 
     if (op == op::get_static_data()) {
       send_msg(sender_address, 0, op::report_static_data(), query_id, begin_cell().store_uint(index, 256).store_slice(collection_address), 64);  ;; carry all the remaining value of the inbound message
+      return ();
+    }
+
+    if (op == op::withdraw()) {
+      throw_unless(73, equal_slices(sender_address, admin_address));
+      [int balance, cell currencies] = get_balance();
+      var msg = begin_cell()
+      .store_uint(0x10, 6) ;; nobounce
+      .store_slice(admin_address)
+      .store_coins(balance - min_tons_for_storage())
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .end_cell();
+
+      send_raw_message(msg, 1);
       return ();
     }
 

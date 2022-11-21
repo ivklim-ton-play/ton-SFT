@@ -12,6 +12,7 @@ import {
   JETTON_COLLECTION_OWNER_ADDRESS,
   JETTON_METADATA_COMMON_URL,
   JETTON_COLLECTION_METADATA_URL,
+  ROYALTY_PERCENT,
 } from "../constants";
 import { getCellFromJson } from "../../utils/build-utils";
 import {
@@ -26,7 +27,7 @@ async function main() {
   const [cllection_owner_wallet] = await GetWallet();
 
   const royalty = {
-    numerator: 8,
+    numerator: ROYALTY_PERCENT,
     denominator: 100,
     to: Address.parse(ROYALTY_ADDRESS),
   };

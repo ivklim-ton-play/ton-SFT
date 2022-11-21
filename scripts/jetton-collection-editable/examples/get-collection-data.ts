@@ -9,7 +9,10 @@ async function main() {
 
   const result = await collectionView.getJettonCollectionData(collection);
   console.log("next jetton-minter-index:", result?.nextJettonMinterIndex);
-  console.log("metadata:", result?.metadata);
+
+  const metadata = result?.metadata.beginParse();
+
+  console.log("metadata:", metadata?.readRemainingBytes().toString());
   console.log("owner:", result?.owner);
 }
 main().catch((r) => console.log(r.response ?? r));

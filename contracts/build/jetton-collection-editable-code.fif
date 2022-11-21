@@ -1,11 +1,7 @@
 "Asm.fif" include
-// automatically generated from `contracts/stdlib.fc` `contracts/params.fc` `contracts/op-codes.fc` `contracts/jetton-utils.fc` `contracts/jetton-collection-editable.fc` 
+// automatically generated from `stdlib.fc` `params.fc` `op-codes.fc` `jetton-collection-editable.fc` 
 PROGRAM{
   DECLPROC force_chain
-  DECLPROC pack_jetton_wallet_data
-  DECLPROC calculate_jetton_wallet_state_init
-  DECLPROC calculate_jetton_wallet_address
-  DECLPROC calculate_user_jetton_wallet_address
   DECLPROC load_data
   DECLPROC save_data
   DECLPROC calculate_jetton_item_state_init
@@ -24,50 +20,6 @@ PROGRAM{
     0 PUSHINT	//  wc _5
     EQUAL	//  _6
     333 THROWIFNOT
-  }>
-  pack_jetton_wallet_data PROC:<{
-    //  balance owner_address jetton_minter_address jetton_wallet_code
-    NEWC	//  balance owner_address jetton_minter_address jetton_wallet_code _4
-    s0 s4 XCHG2	//  jetton_wallet_code owner_address jetton_minter_address _4 balance
-    STVARUINT16	//  jetton_wallet_code owner_address jetton_minter_address _5
-    ROT	//  jetton_wallet_code jetton_minter_address _5 owner_address
-    STSLICER	//  jetton_wallet_code jetton_minter_address _6
-    SWAP	//  jetton_wallet_code _6 jetton_minter_address
-    STSLICER	//  jetton_wallet_code _7
-    STREF	//  _8
-    ENDC	//  _9
-  }>
-  calculate_jetton_wallet_state_init PROC:<{
-    //  owner_address jetton_minter_address jetton_wallet_code
-    0 PUSHINT	//  owner_address jetton_minter_address jetton_wallet_code _3=0
-    s0 s1 s2 XCPUXC
-    s4 s0 s3 XC2PU	//  _3=0 jetton_wallet_code _4=0 owner_address jetton_minter_address jetton_wallet_code
-    pack_jetton_wallet_data INLINECALLDICT	//  _3=0 jetton_wallet_code _5
-    s2 PUSH	//  _3=0 jetton_wallet_code _5 _6=0
-    NEWC	//  _3=0 jetton_wallet_code _5 _6=0 _7
-    2 STU	//  _3=0 jetton_wallet_code _5 _9
-    s1 s2 XCHG	//  _3=0 _5 jetton_wallet_code _9
-    STDICT	//  _3=0 _5 _10
-    STDICT	//  _3=0 _11
-    1 STU	//  _13
-    ENDC	//  _14
-  }>
-  calculate_jetton_wallet_address PROC:<{
-    //  state_init
-    HASHCU	//  _1
-    0 PUSHINT	//  _1 _2
-    4 PUSHINT	//  _1 _2 _3=4
-    NEWC	//  _1 _2 _3=4 _4
-    3 STU	//  _1 _2 _6
-    8 STI	//  _1 _8
-    256 STU	//  _10
-    ENDC	//  _11
-    CTOS	//  _12
-  }>
-  calculate_user_jetton_wallet_address PROC:<{
-    //  owner_address jetton_minter_address jetton_wallet_code
-    calculate_jetton_wallet_state_init INLINECALLDICT	//  _3
-    calculate_jetton_wallet_address INLINECALLDICT	//  _4
   }>
   load_data PROC:<{
     // 

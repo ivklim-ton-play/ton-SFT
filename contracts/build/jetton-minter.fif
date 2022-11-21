@@ -1,5 +1,5 @@
 "Asm.fif" include
-// automatically generated from `contracts/stdlib.fc` `contracts/params.fc` `contracts/op-codes.fc` `contracts/jetton-utils.fc` `contracts/jetton-minter.fc` 
+// automatically generated from `stdlib.fc` `params.fc` `op-codes.fc` `jetton-utils.fc` `jetton-minter.fc` 
 PROGRAM{
   DECLPROC force_chain
   DECLPROC pack_jetton_wallet_data
